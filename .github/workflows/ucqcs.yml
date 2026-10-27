@@ -233,9 +233,10 @@ jobs:
           EXIT_CODE=$?
           set -e
           if [ -n "$UNFORMATTED" ]; then
-            echo "⚠️ gofmt: files not formatted:" >> .go-results.txt
+            echo "❌ gofmt: files not formatted:" >> .go-results.txt
             echo "$UNFORMATTED" >> .go-results.txt
             echo "GOFMT_WARN=true" >> .go-results.txt
+            exit 1
           fi
 
       - name: Vet
@@ -256,8 +257,9 @@ jobs:
           EXIT_CODE=$?
           set -e
           if [ $EXIT_CODE -ne 0 ]; then
-            echo "⚠️ govulncheck: $OUTPUT" >> .go-results.txt
+            echo "❌ govulncheck: $OUTPUT" >> .go-results.txt
             echo "VULN_WARN=true" >> .go-results.txt
+            exit 1
           fi
       - name: Security
         run: |
@@ -323,8 +325,9 @@ jobs:
           EXIT_CODE=$?
           set -e
           if [ $EXIT_CODE -ne 0 ]; then
-            echo "⚠️ npm audit: $OUTPUT" >> .node-results.txt
+            echo "❌ npm audit: $OUTPUT" >> .node-results.txt
             echo "AUDIT_WARN=true" >> .node-results.txt
+            exit 1
           fi
       - name: ESLint
         run: |
@@ -380,8 +383,9 @@ jobs:
           EXIT_CODE=$?
           set -e
           if [ $EXIT_CODE -ne 0 ]; then
-            echo "⚠️ tsc: $OUTPUT" >> .ts-results.txt
+            echo "❌ tsc: $OUTPUT" >> .ts-results.txt
             echo "TSC_WARN=true" >> .ts-results.txt
+            exit 1
           fi
       - id: summary
         if: always()
@@ -426,8 +430,9 @@ jobs:
           EXIT_CODE=$?
           set -e
           if [ $EXIT_CODE -ne 0 ]; then
-            echo "⚠️ ruff format: $OUTPUT" >> .python-results.txt
+            echo "❌ ruff format: $OUTPUT" >> .python-results.txt
             echo "RUFF_FORMAT_WARN=true" >> .python-results.txt
+            exit 1
           fi
 
       - name: Pip Audit
@@ -438,8 +443,9 @@ jobs:
           EXIT_CODE=$?
           set -e
           if [ $EXIT_CODE -ne 0 ]; then
-            echo "⚠️ pip-audit: $OUTPUT" >> .python-results.txt
+            echo "❌ pip-audit: $OUTPUT" >> .python-results.txt
             echo "AUDIT_WARN=true" >> .python-results.txt
+            exit 1
           fi
       - name: Bandit
         run: |
