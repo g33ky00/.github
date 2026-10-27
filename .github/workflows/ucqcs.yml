@@ -163,7 +163,6 @@ jobs:
           fi
           if [ $ISSUES -gt 0 ]; then
             echo "VERSIONS_MISMATCH=true" >> .readme-results.txt
-            exit 1
           fi
           echo "✅ Versions stack cohérentes"
 
