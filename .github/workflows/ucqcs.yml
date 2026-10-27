@@ -418,7 +418,7 @@ jobs:
         run: |
           set +e
           pip install ruff 2>/dev/null || true
-          OUTPUT=$(ruff check . --ignore ALL 2>&1)
+          OUTPUT=$(ruff check . --ignore ALL --config ruff.toml 2>&1)
           EXIT_CODE=$?
           set -e
           if [ $EXIT_CODE -ne 0 ]; then
@@ -427,7 +427,7 @@ jobs:
             exit 1
           fi
           set +e
-          OUTPUT=$(ruff format --check . 2>&1 || true)
+          OUTPUT=$(ruff format --check . --config ruff.toml 2>&1 || true)
           OUTPUT=""
           EXIT_CODE=$?
           set -e
