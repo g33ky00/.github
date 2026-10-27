@@ -6,7 +6,6 @@ on:
       github_token:
         description: "GitHub token (auto-provided)"
         required: false
-        default: ${{ github.token }}
 
 permissions:
   contents: read
