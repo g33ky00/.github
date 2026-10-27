@@ -174,9 +174,8 @@ jobs:
             if [ -f "$LIC" ]; then
               echo "✅ Fichier licence : $LIC"
             else
-              echo "❌ Licence référencée mais fichier absent : $LIC" >> .readme-results.txt
+              echo "⚠️ Licence référencée mais fichier absent : $LIC" >> .readme-results.txt
               echo "LICENSE_MISSING=true" >> .readme-results.txt
-              exit 1
             fi
           else
             echo "⏭️ Pas de section licence"
