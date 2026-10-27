@@ -67,7 +67,6 @@ jobs:
   readme-check:
     name: README Compliance
     runs-on: ubuntu-latest
-    continue-on-error: true
     outputs:
       result: ${{ steps.summary.outputs.readme_result }}
       details: ${{ steps.summary.outputs.readme_details }}
@@ -203,6 +202,7 @@ jobs:
           if [ -f .readme-results.txt ]; then
             DETAILS=$(cat .readme-results.txt | tr '\n' ' ' | sed 's/"/\\"/g' | cut -c1-500)
             echo "readme_details=$DETAILS" >> $GITHUB_OUTPUT
+            exit 1
           else
             echo "readme_details=Aucun problème détecté" >> $GITHUB_OUTPUT
           fi
