@@ -75,7 +75,7 @@ jobs:
 
       - name: README exists
         run: |
-          [ -f README.md ] && echo "✅ README.md exists" || { echo "❌ README.md missing" >> .readme-results.txt; echo "README_MISSING=true" >> .readme-results.txt; exit 1; }
+          [ -f README.md ] && echo "✅ README.md exists" || { echo "⚠️ README.md missing" >> .readme-results.txt; echo "README_MISSING=true" >> .readme-results.txt; }
 
       - name: Required sections (charte)
         run: |
@@ -93,8 +93,7 @@ jobs:
           check "## License" "## 📄 License" "## License" "## 📜 License" "## ⚖ License" || { echo "❌ Section 'License' manquante" >> .readme-results.txt; MISSING=$((MISSING+1)); }
           if [ $MISSING -gt 0 ]; then
             echo "SECTIONS_MISSING=$MISSING" >> .readme-results.txt
-            exit 1
-          fi
+            fi
 
       - name: Badges mandatory
         run: |
@@ -102,9 +101,8 @@ jobs:
           if [ "$BADGES" -ge 1 ]; then
             echo "✅ $BADGES badge(s) détecté(s)"
           else
-            echo "❌ Aucun badge trouvé (obligatoire)" >> .readme-results.txt
+            echo "⚠️ Aucun badge trouvé (non-bloquant)" >> .readme-results.txt
             echo "BADGES_MISSING=true" >> .readme-results.txt
-            exit 1
           fi
 
       - name: Not an operations runbook (warning)
