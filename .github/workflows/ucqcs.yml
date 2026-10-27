@@ -642,16 +642,13 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - name: PSScriptAnalyzer
         run: |
-          set +e
-          Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser 2>/dev/null || true
-          OUTPUT=$(Invoke-ScriptAnalyzer -Path . -Recurse -Severity Error,Warning 2>&1)
-          EXIT_CODE=$?
-          set -e
-          if [ $EXIT_CODE -ne 0 ]; then
-            echo "❌ PSScriptAnalyzer: $OUTPUT" >> .ps-results.txt
-            echo "ANALYZE_FAIL=true" >> .ps-results.txt
+          try { Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser -ErrorAction Stop } catch { }
+          $results = Invoke-ScriptAnalyzer -Path . -Recurse -Severity Error,Warning 2>&1
+          if ($results) {
+            $results | Out-String | Out-File -Append .ps-results.txt
+            "ANALYZE_FAIL=true" | Out-File -Append .ps-results.txt
             exit 1
-          fi
+          }
         shell: pwsh
       - name: Pester Tests
         run: |
