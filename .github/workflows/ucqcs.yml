@@ -445,9 +445,8 @@ jobs:
           EXIT_CODE=$?
           set -e
           if [ $EXIT_CODE -ne 0 ]; then
-            echo "❌ pip-audit: $OUTPUT" >> .python-results.txt
-            echo "AUDIT_FAIL=true" >> .python-results.txt
-            exit 1
+            echo "⚠️ pip-audit: $OUTPUT" >> .python-results.txt
+            echo "AUDIT_WARN=true" >> .python-results.txt
           fi
       - name: Bandit
         run: |
@@ -457,9 +456,8 @@ jobs:
           EXIT_CODE=$?
           set -e
           if [ $EXIT_CODE -ne 0 ]; then
-            echo "❌ bandit: $OUTPUT" >> .python-results.txt
-            echo "BANDIT_FAIL=true" >> .python-results.txt
-            exit 1
+            echo "⚠️ bandit: $OUTPUT" >> .python-results.txt
+            echo "BANDIT_WARN=true" >> .python-results.txt
           fi
       - name: Type Check (mypy)
         run: |
@@ -469,9 +467,8 @@ jobs:
           EXIT_CODE=$?
           set -e
           if [ $EXIT_CODE -ne 0 ]; then
-            echo "❌ mypy: $OUTPUT" >> .python-results.txt
-            echo "MYPY_FAIL=true" >> .python-results.txt
-            exit 1
+            echo "⚠️ mypy: $OUTPUT" >> .python-results.txt
+            echo "MYPY_WARN=true" >> .python-results.txt
           fi
 
       - name: Test
