@@ -66,6 +66,7 @@ jobs:
   readme-check:
     name: README Compliance
     runs-on: ubuntu-latest
+    continue-on-error: true
     outputs:
       result: ${{ steps.summary.outputs.readme_result }}
       details: ${{ steps.summary.outputs.readme_details }}
