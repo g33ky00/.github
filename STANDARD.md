@@ -14,6 +14,12 @@
 - Fichier LICENSE présent si référencé
 
 ## Niveau de qualité de code (progressif)
+
+### Calendrier d'implémentation
+- **Niveau 1** : GO immédiat (secrets, CVE critiques, formatage, build)
+- **Niveau 2** : J+15 (linting, type checking, Strix quick, couverture 60%)
+- **Niveau 3** : J+45 (couverture 80%, Strix deep, documentation)
+- **Niveau 4** : J+60 (couverture 90%, performance benchmarks)
 - Formatage : gofmt, ruff format, prettier (bloquant)
 - Linting : eslint, ruff check, golangci-lint (bloquant)
 - Type checking : tsc --noEmit, mypy (bloquant)
