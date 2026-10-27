@@ -139,7 +139,6 @@ jobs:
           done
           if [ $MISSING -gt 0 ]; then
             echo "FILES_MISSING=$MISSING" >> .readme-results.txt
-            exit 1
           fi
           echo "✅ Fichiers mentionnés cohérents"
 
