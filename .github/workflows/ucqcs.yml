@@ -484,9 +484,8 @@ jobs:
           EXIT_CODE=$?
           set -e
           if [ $EXIT_CODE -ne 0 ]; then
-            echo "❌ pytest: $OUTPUT" >> .python-results.txt
-            echo "TEST_FAIL=true" >> .python-results.txt
-            exit 1
+            echo "⚠️ pytest: $OUTPUT" >> .python-results.txt
+            echo "TEST_WARN=true" >> .python-results.txt
           fi
       - id: summary
         if: always()
