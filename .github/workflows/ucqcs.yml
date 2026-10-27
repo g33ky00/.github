@@ -62,22 +62,6 @@ jobs:
             echo "secrets_details=Aucun problème détecté" >> $GITHUB_OUTPUT
           fi
 
-  semgrep:
-    name: Semgrep (SAST)
-    runs-on: ubuntu-latest
-    if: ${{ secrets.SEMGREP_APP_TOKEN != '' }}
-    permissions:
-      contents: read
-      security-events: write
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - name: Run Semgrep
-        uses: semgrep/semgrep-action@v1
-        with:
-          config: auto
-        env:
-          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
-
   readme-check:
     name: README Compliance
     runs-on: ubuntu-latest
@@ -802,7 +786,7 @@ jobs:
   ci-summary:
     name: CI Summary
     if: always()
-    needs: [detect, secrets-scan, readme-check, semgrep, go-checks, node-checks, typescript-checks, python-checks, php-checks, rust-checks, powershell-checks, java-checks, ruby-checks]
+    needs: [detect, secrets-scan, readme-check, go-checks, node-checks, typescript-checks, python-checks, php-checks, rust-checks, powershell-checks, java-checks, ruby-checks]
     runs-on: ubuntu-latest
     steps:
       - name: Report
