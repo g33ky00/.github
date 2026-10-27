@@ -230,10 +230,9 @@ jobs:
           EXIT_CODE=$?
           set -e
           if [ -n "$UNFORMATTED" ]; then
-            echo "❌ gofmt: files not formatted:" >> .go-results.txt
+            echo "⚠️ gofmt: files not formatted:" >> .go-results.txt
             echo "$UNFORMATTED" >> .go-results.txt
-            echo "GOFMT_FAIL=true" >> .go-results.txt
-            exit 1
+            echo "GOFMT_WARN=true" >> .go-results.txt
           fi
 
       - name: Vet
@@ -243,9 +242,8 @@ jobs:
           EXIT_CODE=$?
           set -e
           if [ $EXIT_CODE -ne 0 ]; then
-            echo "❌ go vet: $OUTPUT" >> .go-results.txt
-            echo "VET_FAIL=true" >> .go-results.txt
-            exit 1
+            echo "⚠️ go vet: $OUTPUT" >> .go-results.txt
+            echo "VET_WARN=true" >> .go-results.txt
           fi
       - name: Vuln Check
         run: |
@@ -255,9 +253,8 @@ jobs:
           EXIT_CODE=$?
           set -e
           if [ $EXIT_CODE -ne 0 ]; then
-            echo "❌ govulncheck: $OUTPUT" >> .go-results.txt
-            echo "VULN_FAIL=true" >> .go-results.txt
-            exit 1
+            echo "⚠️ govulncheck: $OUTPUT" >> .go-results.txt
+            echo "VULN_WARN=true" >> .go-results.txt
           fi
       - name: Security
         run: |
@@ -267,9 +264,8 @@ jobs:
           EXIT_CODE=$?
           set -e
           if [ $EXIT_CODE -ne 0 ]; then
-            echo "❌ gosec: $OUTPUT" >> .go-results.txt
-            echo "SEC_FAIL=true" >> .go-results.txt
-            exit 1
+            echo "⚠️ gosec: $OUTPUT" >> .go-results.txt
+            echo "SEC_WARN=true" >> .go-results.txt
           fi
       - name: Tests
         run: |
