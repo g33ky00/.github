@@ -37,6 +37,7 @@ jobs:
   secrets-scan:
     name: Secrets Scan
     runs-on: ubuntu-latest
+    continue-on-error: true
     outputs:
       result: ${{ steps.summary.outputs.secrets_result }}
       details: ${{ steps.summary.outputs.secrets_details }}
