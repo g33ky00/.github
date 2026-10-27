@@ -84,11 +84,11 @@ jobs:
             done
             return 1
           }
-          check "## À propos" "## About" "## 📖 À propos" "## 🎖 À propos" "## 📋 À propos" || { echo "❌ Section 'À propos' manquante" >> .readme-results.txt; MISSING=$((MISSING+1)); }
+          check "## About" "## About" "## 📖 About" "## 🎖 About" "## 📋 About" || { echo "❌ Section 'About' manquante" >> .readme-results.txt; MISSING=$((MISSING+1)); }
           check "## Structure" "## 📁 Structure" "## 🗂 Structure" "## Project Structure" "## Arborescence" || { echo "❌ Section 'Structure' manquante" >> .readme-results.txt; MISSING=$((MISSING+1)); }
           check "## Stack" "## 🛠 Stack" "## ⚙ Stack" "## Tech Stack" "## Built With" "## 📚 Stack" || { echo "❌ Section 'Stack' manquante" >> .readme-results.txt; MISSING=$((MISSING+1)); }
           check "## Contribution" "## 🤝 Contribution" "## Contributing" "## Contribuer" "## 👥 Contribution" || { echo "❌ Section 'Contribution' manquante" >> .readme-results.txt; MISSING=$((MISSING+1)); }
-          check "## Licence" "## 📄 Licence" "## License" "## 📜 Licence" "## ⚖ Licence" || { echo "❌ Section 'Licence/License' manquante" >> .readme-results.txt; MISSING=$((MISSING+1)); }
+          check "## License" "## 📄 License" "## License" "## 📜 License" "## ⚖ License" || { echo "❌ Section 'License' manquante" >> .readme-results.txt; MISSING=$((MISSING+1)); }
           if [ $MISSING -gt 0 ]; then
             echo "SECTIONS_MISSING=$MISSING" >> .readme-results.txt
             exit 1
