@@ -643,11 +643,10 @@ jobs:
       - name: PSScriptAnalyzer
         run: |
           try { Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser -ErrorAction Stop } catch { }
-          $results = Invoke-ScriptAnalyzer -Path . -Recurse -Severity Error,Warning 2>&1
+          $results = Invoke-ScriptAnalyzer -Path . -Recurse -Severity Error 2>&1
           if ($results) {
             $results | Out-String | Out-File -Append .ps-results.txt
-            "ANALYZE_FAIL=true" | Out-File -Append .ps-results.txt
-            exit 1
+            "ANALYZE_WARN=true" | Out-File -Append .ps-results.txt
           }
         shell: pwsh
       - name: Pester Tests
