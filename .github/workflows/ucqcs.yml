@@ -199,10 +199,13 @@ jobs:
         run: |
           RESULT="${{ job.status }}"
           echo "readme_result=$RESULT" >> $GITHUB_OUTPUT
-          if [ -f .readme-results.txt ]; then
+          if [ -f .readme-results.txt ] && grep -q "❌" .readme-results.txt; then
             DETAILS=$(cat .readme-results.txt | tr '\n' ' ' | sed 's/"/\\"/g' | cut -c1-500)
             echo "readme_details=$DETAILS" >> $GITHUB_OUTPUT
             exit 1
+          elif [ -f .readme-results.txt ]; then
+            DETAILS=$(cat .readme-results.txt | tr '\n' ' ' | sed 's/"/\\"/g' | cut -c1-500)
+            echo "readme_details=$DETAILS" >> $GITHUB_OUTPUT
           else
             echo "readme_details=Aucun problème détecté" >> $GITHUB_OUTPUT
           fi
