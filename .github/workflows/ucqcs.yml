@@ -48,6 +48,8 @@ jobs:
         uses: gitleaks/gitleaks-action@dcedce43c6f43de0b836d1fe38946645c9c638dc # v2
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          GITLEAKS_LOG_OPTS: --all
+          GITLEAKS_CONFIG: .gitleaks.toml
       - id: summary
         if: always()
         run: |
@@ -458,6 +460,19 @@ jobs:
             echo "BANDIT_FAIL=true" >> .python-results.txt
             exit 1
           fi
+      - name: Type Check (mypy)
+        run: |
+          set +e
+          pip install mypy 2>/dev/null || true
+          OUTPUT=$(mypy . --ignore-missing-imports 2>&1)
+          EXIT_CODE=$?
+          set -e
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "❌ mypy: $OUTPUT" >> .python-results.txt
+            echo "MYPY_FAIL=true" >> .python-results.txt
+            exit 1
+          fi
+
       - name: Test
         run: |
           set +e
@@ -556,6 +571,18 @@ jobs:
             echo "AUDIT_FAIL=true" >> .rust-results.txt
             exit 1
           fi
+      - name: Format Check (cargo fmt)
+        run: |
+          set +e
+          OUTPUT=$(cargo fmt -- --check 2>&1)
+          EXIT_CODE=$?
+          set -e
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "❌ cargo fmt: $OUTPUT" >> .rust-results.txt
+            echo "FMT_FAIL=true" >> .rust-results.txt
+            exit 1
+          fi
+
       - name: Clippy
         run: |
           set +e
