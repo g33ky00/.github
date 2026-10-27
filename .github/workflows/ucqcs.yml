@@ -657,15 +657,20 @@ jobs:
         shell: pwsh
       - name: Pester Tests
         run: |
-          set +e
-          if (Get-Module -ListAvailable -Name Pester) -or (Install-Module -Name Pester -Force -Scope CurrentUser 2>/dev/null) {
-            OUTPUT=$(Invoke-Pester -Path . -Recurse -Output Detailed 2>&1)
-            EXIT_CODE=$?
-            if ($EXIT_CODE -ne 0) {
-              echo "❌ Pester: $OUTPUT" >> .ps-results.txt
-              echo "PESTER_FAIL=true" >> .ps-results.txt
+          $pesterAvailable = Get-Module -ListAvailable -Name Pester
+          if (-not $pesterAvailable) {
+            try { Install-Module -Name Pester -Force -Scope CurrentUser -ErrorAction Stop } catch { Write-Host "Pester not available, skipping" }
+          }
+          $pesterAvailable = Get-Module -ListAvailable -Name Pester
+          if ($pesterAvailable) {
+            $result = Invoke-Pester -Path . -Recurse -PassThru 2>&1
+            if ($result.FailedCount -gt 0) {
+              "❌ Pester: $($result.FailedCount) test(s) failed" | Out-File -Append .ps-results.txt
+              "PESTER_FAIL=true" | Out-File -Append .ps-results.txt
               exit 1
             }
+          } else {
+            Write-Host "Pester not available, skipping tests"
           }
         shell: pwsh
 
