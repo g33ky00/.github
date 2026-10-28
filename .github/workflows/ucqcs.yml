@@ -332,7 +332,8 @@ jobs:
       - name: ESLint
         run: |
           set +e
-          OUTPUT=$(npx eslint . --max-warnings=0 --ignore-pattern 'node_modules/' --ignore-pattern 'dist/' --ignore-pattern 'build/' 2>&1)
+          npm install -g eslint-plugin-security 2>/dev/null || true
+          OUTPUT=$(npx eslint . --max-warnings=0 --ignore-pattern 'node_modules/' --ignore-pattern 'dist/' --ignore-pattern 'build/' --plugin security 2>&1)
           EXIT_CODE=$?
           set -e
           if [ $EXIT_CODE -ne 0 ]; then
@@ -481,7 +482,8 @@ jobs:
             pip3 install -e . 2>/dev/null || pip3 install . 2>/dev/null || true
           fi
           pip3 install pytest 2>/dev/null || true
-          OUTPUT=$(python3 -m pytest 2>&1)
+          pip3 install pytest-benchmark 2>/dev/null || true
+          OUTPUT=$(python3 -m pytest --benchmark-disable 2>&1)
           EXIT_CODE=$?
           set -e
           if [ $EXIT_CODE -ne 0 ]; then
@@ -780,10 +782,107 @@ jobs:
             echo "ruby_details=Aucun problème détecté" >> $GITHUB_OUTPUT
           fi
 
+
+  license-compliance:
+    name: License Compliance
+    runs-on: ubuntu-latest
+    outputs:
+      result: ${{ steps.summary.outputs.license_result }}
+      details: ${{ steps.summary.outputs.license_details }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Check licenses (Node.js)
+        if: hashFiles('package.json') != ''
+        run: |
+          set +e
+          if [ -f package.json ]; then
+            npx license-checker --production --summary 2>&1 | tee .license-results.txt
+          fi
+          set -e
+        continue-on-error: true
+      - name: Check licenses (Python)
+        if: hashFiles('requirements.txt') != '' || hashFiles('pyproject.toml') != ''
+        run: |
+          set +e
+          pip install pip-licenses 2>/dev/null || true
+          if [ -f requirements.txt ] || [ -f pyproject.toml ]; then
+            pip-licenses --summary 2>&1 | tee -a .license-results.txt
+          fi
+          set -e
+        continue-on-error: true
+      - name: Check licenses (Go)
+        if: hashFiles('go.mod') != ''
+        run: |
+          set +e
+          go install github.com/google/go-licenses@latest 2>/dev/null || true
+          if [ -f go.mod ]; then
+            go-licenses check ./... 2>&1 | tee -a .license-results.txt
+          fi
+          set -e
+        continue-on-error: true
+      - name: Check licenses (Rust)
+        if: hashFiles('Cargo.toml') != ''
+        run: |
+          set +e
+          cargo install cargo-license 2>/dev/null || true
+          if [ -f Cargo.toml ]; then
+            cargo license 2>&1 | tee -a .license-results.txt
+          fi
+          set -e
+        continue-on-error: true
+      - name: License file exists
+        run: |
+          if [ ! -f LICENSE ] && [ ! -f LICENSE.md ] && [ ! -f LICENSE.txt ]; then
+            echo "⚠️ LICENSE file missing" >> .license-results.txt
+          else
+            echo "✅ LICENSE file present" >> .license-results.txt
+          fi
+      - id: summary
+        if: always()
+        run: |
+          RESULT="${{ job.status }}"
+          echo "license_result=$RESULT" >> $GITHUB_OUTPUT
+          if [ -f .license-results.txt ]; then
+            DETAILS=$(cat .license-results.txt | tr '\n' ' ' | sed 's/\"/\\\"/g' | cut -c1-500)
+            echo "license_details=$DETAILS" >> $GITHUB_OUTPUT
+          else
+            echo "license_details=Aucun problème détecté" >> $GITHUB_OUTPUT
+          fi
+
+
+  markdown-lint:
+    name: Markdown Lint
+    runs-on: ubuntu-latest
+    outputs:
+      result: ${{ steps.summary.outputs.md_result }}
+      details: ${{ steps.summary.outputs.md_details }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Markdown Lint
+        run: |
+          set +e
+          npx markdownlint-cli2 "**/*.md" "#node_modules" 2>&1 | tee .md-results.txt
+          EXIT_CODE=$?
+          set -e
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "⚠️ markdownlint: issues found" >> .md-results.txt
+          fi
+      - id: summary
+        if: always()
+        run: |
+          RESULT="${{ job.status }}"
+          echo "md_result=$RESULT" >> $GITHUB_OUTPUT
+          if [ -f .md-results.txt ]; then
+            DETAILS=$(cat .md-results.txt | tr '\n' ' ' | sed 's/\"/\\\"/g' | cut -c1-500)
+            echo "md_details=$DETAILS" >> $GITHUB_OUTPUT
+          else
+            echo "md_details=Aucun problème détecté" >> $GITHUB_OUTPUT
+          fi
+
   ci-summary:
     name: CI Summary
     if: always()
-    needs: [detect, secrets-scan, readme-check, go-checks, node-checks, typescript-checks, python-checks, php-checks, rust-checks, powershell-checks, java-checks, ruby-checks]
+    needs: [detect, secrets-scan, readme-check, go-checks, node-checks, typescript-checks, python-checks, php-checks, rust-checks, powershell-checks, java-checks, ruby-checks, license-compliance, markdown-lint]
     runs-on: ubuntu-latest
     steps:
       - name: Report
@@ -836,6 +935,10 @@ jobs:
           JCD="${{ needs.java-checks.outputs.details }}"
           RB="${{ needs.ruby-checks.result }}"
           RBD="${{ needs.ruby-checks.outputs.details }}"
+          LC="${{ needs.license-compliance.result }}"
+          LCD="${{ needs.license-compliance.outputs.details }}"
+          MD="${{ needs.markdown-lint.result }}"
+          MDD="${{ needs.markdown-lint.outputs.details }}"
           
           FAILED=0
           
@@ -871,6 +974,12 @@ jobs:
           
           check "Ruby Checks" "$RB" "$RBD"
           [ "$RB" = "failure" ] && FAILED=$((FAILED+1))
+
+          check "License Compliance" "$LC" "$LCD"
+          [ "$LC" = "failure" ] && FAILED=$((FAILED+1))
+
+          check "Markdown Lint" "$MD" "$MDD"
+          [ "$MD" = "failure" ] && FAILED=$((FAILED+1))
           
           echo ""
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -938,6 +1047,8 @@ jobs:
           summary_row "PowerShell Checks" "$PS" "$PSD"
           summary_row "Java Checks" "$JC" "$JCD"
           summary_row "Ruby Checks" "$RB" "$RBD"
+          summary_row "License Compliance" "$LC" "$LCD"
+          summary_row "Markdown Lint" "$MD" "$MDD"
           
           echo "" >> $GITHUB_STEP_SUMMARY
           
