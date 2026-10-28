@@ -792,7 +792,6 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - name: Check licenses (Node.js)
-        if: hashFiles('package.json') != ''
         run: |
           set +e
           if [ -f package.json ]; then
@@ -801,7 +800,6 @@ jobs:
           set -e
         continue-on-error: true
       - name: Check licenses (Python)
-        if: hashFiles('requirements.txt') != '' || hashFiles('pyproject.toml') != ''
         run: |
           set +e
           pip install pip-licenses 2>/dev/null || true
@@ -811,7 +809,6 @@ jobs:
           set -e
         continue-on-error: true
       - name: Check licenses (Go)
-        if: hashFiles('go.mod') != ''
         run: |
           set +e
           go install github.com/google/go-licenses@latest 2>/dev/null || true
@@ -821,7 +818,6 @@ jobs:
           set -e
         continue-on-error: true
       - name: Check licenses (Rust)
-        if: hashFiles('Cargo.toml') != ''
         run: |
           set +e
           cargo install cargo-license 2>/dev/null || true
