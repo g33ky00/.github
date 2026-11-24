@@ -337,7 +337,6 @@ jobs:
       - name: ESLint
         run: |
           set +e
-          npm install -g eslint-plugin-security 2>/dev/null || true
           OUTPUT=$(npx eslint . --max-warnings=0 --ignore-pattern 'node_modules/' --ignore-pattern 'dist/' --ignore-pattern 'build/' --plugin security 2>&1)
           EXIT_CODE=$?
           set -e
@@ -370,7 +369,7 @@ jobs:
   typescript-checks:
     name: TypeScript
     needs: detect
-    if: needs.detect.outputs.has_typescript == 'true'
+    if: needs.detect.outputs.has_node == 'true'
     runs-on: ubuntu-latest
     outputs:
       result: ${{ steps.summary.outputs.ts_result }}
@@ -384,7 +383,6 @@ jobs:
       - name: Type Check
         run: |
           set +e
-          npm install -g typescript 2>/dev/null || true
           OUTPUT=$(npx tsc --noEmit 2>&1)
           EXIT_CODE=$?
           set -e
@@ -751,6 +749,7 @@ jobs:
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: ruby
+          bundler-cache: true
       - name: Audit
         run: |
           set +e
@@ -958,7 +957,6 @@ jobs:
 
   ci-summary:
     name: CI Summary
-    if: always()
     needs: [detect, secrets-scan, readme-check, go-checks, node-checks, typescript-checks, python-checks, php-checks, rust-checks, powershell-checks, java-checks, ruby-checks, license-compliance, markdown-lint, semgrep-checks, strix-quick]
     runs-on: ubuntu-latest
     steps:
@@ -1100,6 +1098,7 @@ jobs:
           echo ""
           echo "Généré le : $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
           echo "UCQCS v4.6 — Unified Code Quality Control System"
+          if [ $FAILED -gt 0 ]; then exit 1; fi
           
           # Write to GitHub Step Summary
           cat >> $GITHUB_STEP_SUMMARY << 'EOF'
