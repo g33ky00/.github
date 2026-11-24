@@ -136,7 +136,7 @@ jobs:
         run: |
           MISSING=0
           # Capturer uniquement les chemins relatifs avec /
-          FILES=$(grep -oE '`[^`]+`|\[.*\]\(([^)]+)\)' README.md | grep -oE '[^`()]+\.(php|js|css|json|md|sh|py|go|txt|html|vue|ts|rb|rs|toml|yml|yaml|env\.example)' | grep -vE '^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)\b' | grep -E '(\.\./|\./|[^/]+\.[a-z]+/)' | grep -vE '^(\.\./|\./|/|\~/)' | sort -u)
+          FILES=$(grep -oE '`[^`]+`|\[.*\]\(([^)]+)\)' README.md | grep -oE '[^`()]+\.(php|js|css|json|md|sh|py|go|txt|html|vue|ts|rb|rs|toml|yml|yaml|env\.example)' | grep -vE '^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)\b' | grep -vE 'https?://' | grep -E '(\.\./|\./|[^/]+\.[a-z]+/)' | grep -vE '^(\.\./|\./|/|\~/)' | sort -u)
           for f in $FILES; do
             echo "$f" | grep -qE '^https?://|^/' && continue
             if [ ! -e "$f" ]; then
