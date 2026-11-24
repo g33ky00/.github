@@ -51,7 +51,8 @@ jobs:
       - name: Gitleaks Scan
         run: |
           curl -sSfL https://github.com/gitleaks/gitleaks/releases/download/v8.18.4/gitleaks_8.18.4_linux_x64.tar.gz | tar xz -C /tmp
-          /tmp/gitleaks detect --source . --config .gitleaks.toml --report-format json --report-path gitleaks-report.json || true
+          if [ -f .gitleaks.toml ]; then CFG="--config .gitleaks.toml"; else CFG=""; fi
+          /tmp/gitleaks detect --source . $CFG --report-format json --report-path gitleaks-report.json || true
           if [ -f gitleaks-report.json ] && [ "$(cat gitleaks-report.json)" != "[]" ]; then
             echo "❌ Secrets détectés" >> .secrets-results.txt
             cat gitleaks-report.json >> .secrets-results.txt
