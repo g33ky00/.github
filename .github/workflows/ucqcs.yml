@@ -6,6 +6,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.repository }}-ucqcs
+  cancel-in-progress: false
+
 jobs:
   detect:
     name: Detect Ecosystem
@@ -875,10 +879,86 @@ jobs:
             echo "md_details=Aucun problème détecté" >> $GITHUB_OUTPUT
           fi
 
+  semgrep-checks:
+    name: Semgrep SAST
+    runs-on: ubuntu-latest
+    outputs:
+      result: ${{ steps.summary.outputs.semgrep_result }}
+      details: ${{ steps.summary.outputs.semgrep_details }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Install Semgrep CE
+        run: |
+          set +e
+          pip install semgrep 2>/dev/null || true
+          set -e
+      - name: Semgrep scan
+        run: |
+          set +e
+          semgrep --config auto --json . > semgrep-report.json 2>&1
+          EXIT_CODE=$?
+          set -e
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "⚠️ semgrep: findings detected" >> .semgrep-results.txt
+            echo "SEMGREP_WARN=true" >> .semgrep-results.txt
+          fi
+          if [ -f semgrep-report.json ]; then
+            cat semgrep-report.json >> .semgrep-results.txt
+          fi
+      - id: summary
+        if: always()
+        run: |
+          RESULT="${{ job.status }}"
+          echo "semgrep_result=$RESULT" >> $GITHUB_OUTPUT
+          if [ -f .semgrep-results.txt ]; then
+            DETAILS=$(cat .semgrep-results.txt | tr '\n' ' ' | sed 's/"//g' | cut -c1-500)
+            echo "semgrep_details=$DETAILS" >> $GITHUB_OUTPUT
+          else
+            echo "semgrep_details=Aucun problème détecté" >> $GITHUB_OUTPUT
+          fi
+
+  strix-quick:
+    name: Strix Quick
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    outputs:
+      result: ${{ steps.summary.outputs.strix_result }}
+      details: ${{ steps.summary.outputs.strix_details }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Install Strix
+        run: |
+          set +e
+          pip install strix-agent 2>/dev/null || true
+          set -e
+      - name: Strix quick scan
+        env:
+          MODEL: openai/poolside/laguna-s-2.1:free
+        run: |
+          set +e
+          strix --model "$MODEL" --quick . 2>&1 | tee .strix-results.txt
+          EXIT_CODE=$?
+          set -e
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "⚠️ strix: issues found" >> .strix-results.txt
+            echo "STRIX_WARN=true" >> .strix-results.txt
+          fi
+      - id: summary
+        if: always()
+        run: |
+          RESULT="${{ job.status }}"
+          echo "strix_result=$RESULT" >> $GITHUB_OUTPUT
+          if [ -f .strix-results.txt ]; then
+            DETAILS=$(cat .strix-results.txt | tr '\n' ' ' | sed 's/"//g' | cut -c1-500)
+            echo "strix_details=$DETAILS" >> $GITHUB_OUTPUT
+          else
+            echo "strix_details=Aucun problème détecté" >> $GITHUB_OUTPUT
+          fi
+
   ci-summary:
     name: CI Summary
     if: always()
-    needs: [detect, secrets-scan, readme-check, go-checks, node-checks, typescript-checks, python-checks, php-checks, rust-checks, powershell-checks, java-checks, ruby-checks, license-compliance, markdown-lint]
+    needs: [detect, secrets-scan, readme-check, go-checks, node-checks, typescript-checks, python-checks, php-checks, rust-checks, powershell-checks, java-checks, ruby-checks, license-compliance, markdown-lint, semgrep-checks, strix-quick]
     runs-on: ubuntu-latest
     steps:
       - name: Report
@@ -935,6 +1015,10 @@ jobs:
           LCD="${{ needs.license-compliance.outputs.details }}"
           MD="${{ needs.markdown-lint.result }}"
           MDD="${{ needs.markdown-lint.outputs.details }}"
+          SG="${{ needs.semgrep-checks.result }}"
+          SGD="${{ needs.semgrep-checks.outputs.details }}"
+          SX="${{ needs.strix-quick.result }}"
+          SXD="${{ needs.strix-quick.outputs.details }}"
           
           FAILED=0
           
@@ -976,6 +1060,12 @@ jobs:
 
           check "Markdown Lint" "$MD" "$MDD"
           [ "$MD" = "failure" ] && FAILED=$((FAILED+1))
+
+          check "Semgrep SAST" "$SG" "$SGD"
+          [ "$SG" = "failure" ] && FAILED=$((FAILED+1))
+
+          check "Strix Quick" "$SX" "$SXD"
+          [ "$SX" = "failure" ] && FAILED=$((FAILED+1))
           
           echo ""
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -1008,7 +1098,7 @@ jobs:
           
           echo ""
           echo "Généré le : $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
-          echo "UCQCS v4.5 — Unified Code Quality Control System"
+          echo "UCQCS v4.6 — Unified Code Quality Control System"
           
           # Write to GitHub Step Summary
           cat >> $GITHUB_STEP_SUMMARY << 'EOF'

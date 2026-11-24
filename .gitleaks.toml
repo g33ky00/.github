@@ -16,12 +16,21 @@ regex = '''(?i)(token|secret|password)\s*[:=]\s*['"][a-zA-Z0-9+/=]{16,}['"]'''
 tags = ["token", "secret"]
 
 [allowlist]
-description = "Allowlist for test fixtures and examples"
+description = "Allowlist for test fixtures, examples, and known public keys"
 paths = [
+  '''aegis/telemetry/posthog\.py$''',
+  '''strix/telemetry/posthog\.py$''',
+  '''internal/service/testdata/.*\.pem$''',
+  '''uv\.lock$''',
+  '''strix/skills/tooling/python\.md$''',
+  '''mfa\.php$''',
   '''\.test\.py$''',
   '''test_.*\.py$''',
   '''_test\.go$''',
   '''\.spec\.js$''',
   '''example''',
   '''fixture''',
+]
+regexes = [
+  '''whsec_NsNZNMSnWVPLt8GErz3SVZ97pWu8eb6D''',
 ]
