@@ -8,7 +8,7 @@ permissions:
 
 concurrency:
   group: ${{ github.repository }}-ucqcs
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   detect:
