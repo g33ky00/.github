@@ -804,7 +804,6 @@ jobs:
             npx license-checker --production --summary 2>&1 | tee .license-results.txt
           fi
           set -e
-        continue-on-error: true
       - name: Check licenses (Python)
         run: |
           set +e
@@ -813,7 +812,6 @@ jobs:
             pip-licenses --summary 2>&1 | tee -a .license-results.txt
           fi
           set -e
-        continue-on-error: true
       - name: Check licenses (Go)
         run: |
           set +e
@@ -822,7 +820,6 @@ jobs:
             go-licenses check ./... 2>&1 | tee -a .license-results.txt
           fi
           set -e
-        continue-on-error: true
       - name: Check licenses (Rust)
         run: |
           set +e
@@ -831,7 +828,6 @@ jobs:
             cargo license 2>&1 | tee -a .license-results.txt
           fi
           set -e
-        continue-on-error: true
       - name: License file exists
         run: |
           if [ ! -f LICENSE ] && [ ! -f LICENSE.md ] && [ ! -f LICENSE.txt ]; then
