@@ -295,8 +295,19 @@ jobs:
           EXIT_CODE=$?
           set -e
           if [ $EXIT_CODE -eq 0 ]; then
+            COV=$(go tool cover -func=coverage.out 2>&1 | awk '/^total:/ {gsub(/%/,"",$3); print $3}')
             go tool cover -func=coverage.out 2>&1 | tee -a .go-results.txt
+            echo "Go coverage: ${COV}%"
+            if awk "BEGIN {exit !($COV < 60)}"; then
+              echo "❌ Coverage ${COV}% < 60%" >> .go-results.txt
+              exit 1
+            fi
           fi
+      - name: Benchmarks (non-blocking)
+        run: |
+          set +e
+          go test -bench=. -run='^$' ./... 2>&1 | tee -a .go-results.txt
+          echo "✅ Benchmarks exécutés (non-bloquant)"
       - id: summary
         if: always()
         run: |
@@ -353,6 +364,18 @@ jobs:
           if [ $EXIT_CODE -ne 0 ]; then
             echo "⚠️ npm test: $OUTPUT" >> .node-results.txt
             echo "TEST_WARN=true" >> .node-results.txt
+          fi
+      - name: Coverage (non-blocking threshold)
+        run: |
+          set +e
+          OUTPUT=$(npm test -- --coverage 2>&1)
+          EXIT_CODE=$?
+          set -e
+          COV=$(echo "$OUTPUT" | grep -oE 'All files[^0-9]*[0-9.]+' | grep -oE '[0-9.]+' | head -1)
+          echo "Node coverage: ${COV}%"
+          if [ -n "$COV" ] && awk "BEGIN {exit !($COV < 60)}"; then
+            echo "❌ Coverage ${COV}% < 60%" >> .node-results.txt
+            exit 1
           fi
       - id: summary
         if: always()
@@ -488,13 +511,29 @@ jobs:
           fi
           pip3 install pytest 2>/dev/null || true
           pip3 install pytest-benchmark 2>/dev/null || true
-          OUTPUT=$(python3 -m pytest --benchmark-disable 2>&1)
+          pip3 install pytest-cov 2>/dev/null || true
+          OUTPUT=$(python3 -m pytest --benchmark-disable --cov=. --cov-report=term-missing 2>&1)
           EXIT_CODE=$?
           set -e
           if [ $EXIT_CODE -ne 0 ]; then
             echo "⚠️ pytest: $OUTPUT" >> .python-results.txt
             echo "TEST_WARN=true" >> .python-results.txt
           fi
+          COV=$(echo "$OUTPUT" | grep -oE 'TOTAL[^0-9]*[0-9]+' | grep -oE '[0-9]+$' | head -1)
+          echo "Python coverage: ${COV}%"
+          if [ -n "$COV" ] && awk "BEGIN {exit !($COV < 60)}"; then
+            echo "❌ Coverage ${COV}% < 60%" >> .python-results.txt
+            exit 1
+          fi
+      - name: Benchmarks (non-blocking)
+        run: |
+          set +e
+          if [ -d tests ] && ls tests/*bench* >/dev/null 2>&1; then
+            python3 -m pytest --benchmark-only 2>&1 | tee -a .python-results.txt || true
+          else
+            python3 -m pytest --benchmark-only 2>&1 | tee -a .python-results.txt || true
+          fi
+          echo "✅ Benchmarks exécutés (non-bloquant)"
       - id: summary
         if: always()
         run: |
