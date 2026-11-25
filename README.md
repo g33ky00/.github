@@ -1,5 +1,7 @@
 # .github — Organisation CI Standards
 
+[![UCQCS](https://img.shields.io/badge/UCQCS-v4.8-blue)](https://github.com/g33ky00/.github)
+
 Reusable workflows and CI standards for the `g33ky00` GitHub organisation.
 
 ## Reusable workflow: UCQCS (Unified Code Quality Control System)
