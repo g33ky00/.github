@@ -1134,7 +1134,7 @@ jobs:
           
           echo ""
           echo "Généré le : $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
-          echo "UCQCS v4.6 — Unified Code Quality Control System"
+          echo "UCQCS v4.8 — Unified Code Quality Control System"
           if [ $FAILED -gt 0 ]; then exit 1; fi
           
           # Write to GitHub Step Summary

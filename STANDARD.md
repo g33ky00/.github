@@ -1,5 +1,13 @@
-# Standard d'exigence — UCQCS v4.6+
+# Standard d'exigence — UCQCS v4.8 (Unified Code Quality Control System)
 
+> UCQCS et CI Unified sont une seule et même chose : le workflow réutilisable `g33ky00/.github/.github/workflows/ucqcs.yml` est le moteur UCQCS, et le caller dans chaque repo s'appelle `ci-unified.yml`. Les deux termes sont interchangeables.
+
+## Principes fondamentaux
+- **Langue** : l'anglais est utilisé absolument partout dans les écrits sur GitHub (README, commits, issues, PRs, workflows, documentation).
+- **About** : le bloc "About" de chaque projet doit être dûment complété (description, topics, homepage).
+- **Licences** : dépôts privés → GNU Affero General Public License v3 (AGPL-3.0) ; dépôts publics → MIT License.
+- **Forks** : les dépôts de type "fork" ne sont PAS traités par UCQCS (nous n'en sommes pas responsables). Ils sont exclus de la flotte UCQCS.
+- **Terminologie** : UCQCS = CI Unified. Aucune confusion tolérée entre les deux termes.
 ## Niveau de sécurité (bloquant)
 - **Secrets scan** (gitleaks) : aucun secret en clair dans le code ou l'historique
 - **SAST** (Semgrep CE sur tous les repos + Strix quick sur PR) : aucun finding critique/high
@@ -32,7 +40,7 @@
 - **Niveau 4** : J+60 (couverture 90%, performance benchmarks)
 
 ## Workflows requis par repo
-- `ci-unified.yml` → UCQCS v4.6+ (reusable depuis g33ky00/.github)
+- `ci-unified.yml` → UCQCS v4.8+ (reusable depuis g33ky00/.github)
 - `strix-quick.yml` → Strix scan sur PR + rapport complet sur erreur
 - `strix-deep.yml` → Strix scan hebdomadaire (lundi 3h)
 - `dependabot.yml` → mises à jour hebdomadaires github-actions
