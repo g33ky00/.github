@@ -556,6 +556,10 @@ jobs:
       details: ${{ steps.summary.outputs.php_details }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
       - name: Syntax
         run: |
           set +e
