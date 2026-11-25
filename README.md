@@ -18,3 +18,27 @@ Tags follow `vMAJOR.MINOR`. Current stable: `v4.5`.
 
 ### Migration from inline ci-unified.yml
 Replace the entire `ci-unified.yml` content with the caller snippet above.
+
+## About
+
+Organisation-level reusable workflows, Dependabot config and CI standards for `g33ky00`.
+
+## Structure
+
+```
+.github/
+└── workflows/
+    └── ucqcs.yml   # reusable UCQCS workflow (v4.8)
+```
+
+## Stack
+
+- GitHub Actions (reusable workflows)
+
+## Contributing
+
+Changes to shared workflows affect the whole fleet. Open a PR and bump the tag.
+
+## License
+
+MIT — see [LICENSE](LICENSE).
